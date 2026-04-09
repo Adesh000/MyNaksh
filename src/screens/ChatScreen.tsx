@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
-import { addMessage, toggleReaction, ChatMessage } from '../store/chatSlice';
+import { addMessage, toggleReaction, setFeedback, ChatMessage } from '../store/chatSlice';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ChatMessageItem from '../components/ChatMessageItem';
 import ChatInput from '../components/ChatInput';
@@ -36,6 +36,10 @@ export default function ChatScreen() {
     setActiveReactionMessageId(null);
   };
 
+  const handleFeedback = (id: string, type: 'liked' | 'disliked') => {
+    dispatch(setFeedback({ id, type }));
+  };
+
   const renderItem = ({ item }: { item: ChatMessage }) => {
     const replyMessage = item.replyTo ? messages.find((m) => m.id === item.replyTo) : null;
 
@@ -48,6 +52,7 @@ export default function ChatScreen() {
         onLongPress={(id) => setActiveReactionMessageId(id)}
         onReactionPress={handleReact}
         onClearReaction={() => setActiveReactionMessageId(null)}
+        onFeedbackPress={handleFeedback}
       />
     );
   };

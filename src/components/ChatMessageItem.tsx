@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, { FadeIn, FadeOut, Layout, LinearTransition } from 'react-native-reanimated';
 import { ChatMessage } from '../store/chatSlice';
 import SwipeableMessage from './SwipeableMessage';
 
 const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+const FEEDBACK_CHIPS = ['Inaccurate', 'Too Vague', 'Too Long'];
 
 interface ChatMessageItemProps {
   item: ChatMessage;
@@ -14,7 +15,25 @@ interface ChatMessageItemProps {
   onLongPress: (id: string) => void;
   onReactionPress: (id: string, emoji: string) => void;
   onClearReaction: () => void;
+  onFeedbackPress: (id: string, type: 'liked' | 'disliked') => void;
 }
+
+const FeedbackButton = ({
+  icon,
+  isActive,
+  onPress,
+}: {
+  icon: string;
+  isActive: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    onPress={onPress}
+    style={[styles.feedbackButton, isActive && styles.feedbackButtonActive]}
+  >
+    <Text style={styles.feedbackIcon}>{icon}</Text>
+  </TouchableOpacity>
+);
 
 export default function ChatMessageItem({
   item,
@@ -24,7 +43,10 @@ export default function ChatMessageItem({
   onLongPress,
   onReactionPress,
   onClearReaction,
+  onFeedbackPress,
 }: ChatMessageItemProps) {
+  const [selectedFeedbackChip, setSelectedFeedbackChip] = useState<string | null>(null);
+
   if (item.sender === 'system') {
     return (
       <View style={styles.systemMessageContainer}>
@@ -116,6 +138,41 @@ export default function ChatMessageItem({
             <Text style={[styles.messageText, isUser && styles.userMessageText]}>
               {item.text}
             </Text>
+
+            {item.sender === 'ai_astrologer' && (
+              <>
+                <View style={styles.feedbackContainer}>
+                  <FeedbackButton
+                    icon="👍"
+                    isActive={item.feedbackType === 'liked'}
+                    onPress={() => onFeedbackPress(item.id, 'liked')}
+                  />
+                  <FeedbackButton
+                    icon="👎"
+                    isActive={item.feedbackType === 'disliked'}
+                    onPress={() => onFeedbackPress(item.id, 'disliked')}
+                  />
+                </View>
+
+                {item.feedbackType === 'disliked' && (
+                  <Animated.View 
+                    entering={FadeIn.duration(500)} 
+                    layout={LinearTransition.duration(500)} 
+                    style={styles.feedbackChipsContainer}
+                  >
+                    {FEEDBACK_CHIPS.map(chip => (
+                      <TouchableOpacity 
+                        key={chip}
+                        onPress={() => setSelectedFeedbackChip(chip)}
+                        style={[styles.feedbackChip, selectedFeedbackChip === chip && styles.feedbackChipSelected]}
+                      >
+                        <Text style={[styles.feedbackChipText, selectedFeedbackChip === chip && styles.feedbackChipTextSelected]}>{chip}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </Animated.View>
+                )}
+              </>
+            )}
           </TouchableOpacity>
 
           {item.reaction && !!item.reaction && (
@@ -288,5 +345,47 @@ const styles = StyleSheet.create({
   reactionBadgeText: {
     fontSize: 14,
     lineHeight: 18,
+  },
+  feedbackContainer: {
+    flexDirection: 'row',
+    marginTop: 8,
+    gap: 8,
+  },
+  feedbackButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: '#F1F5F9',
+  },
+  feedbackButtonActive: {
+    backgroundColor: '#DBEAFE',
+  },
+  feedbackIcon: {
+    fontSize: 14,
+  },
+  feedbackChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 12,
+    gap: 8,
+  },
+  feedbackChip: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+  },
+  feedbackChipSelected: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
+  },
+  feedbackChipText: {
+    fontSize: 12,
+    color: '#475569',
+  },
+  feedbackChipTextSelected: {
+    color: '#FFFFFF',
   },
 });

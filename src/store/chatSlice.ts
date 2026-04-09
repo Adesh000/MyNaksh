@@ -84,8 +84,20 @@ const chatSlice = createSlice({
         }
       }
     },
+    setFeedback(state, action: PayloadAction<{ id: string; type: 'liked' | 'disliked' }>) {
+      const message = state.messages.find((m) => m.id === action.payload.id);
+      if (message) {
+        if (message.feedbackType === action.payload.type) {
+          message.hasFeedback = false;
+          message.feedbackType = undefined;
+        } else {
+          message.hasFeedback = true;
+          message.feedbackType = action.payload.type;
+        }
+      }
+    },
   },
 });
 
-export const { addMessage, toggleReaction } = chatSlice.actions;
+export const { addMessage, toggleReaction, setFeedback } = chatSlice.actions;
 export default chatSlice.reducer;
