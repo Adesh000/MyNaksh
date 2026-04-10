@@ -9,6 +9,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Reply } from 'lucide-react-native';
 
 interface SwipeableMessageProps {
   children: React.ReactNode;
@@ -51,7 +52,7 @@ export default function SwipeableMessage({ children, onSwipe }: SwipeableMessage
   return (
     <View style={{ width: '100%', justifyContent: 'center' }}>
       <Animated.View style={[styles.replyIconContainer, iconStyle]}>
-        <Text style={styles.replyIconText}>↩</Text>
+        <Reply size={20} color="#475569" strokeWidth={2.5} />
       </Animated.View>
       <GestureDetector gesture={panGesture}>
         <Animated.View style={animatedStyle}>{children}</Animated.View>

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Animated, { FadeIn, FadeOut, Layout, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, Layout, LinearTransition, FadeInDown, Easing } from 'react-native-reanimated';
 import { ChatMessage } from '../store/chatSlice';
 import SwipeableMessage from './SwipeableMessage';
+import { ThumbsUp, ThumbsDown } from 'lucide-react-native';
 
 const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 const FEEDBACK_CHIPS = ['Inaccurate', 'Too Vague', 'Too Long'];
@@ -19,11 +20,11 @@ interface ChatMessageItemProps {
 }
 
 const FeedbackButton = ({
-  icon,
+  Icon,
   isActive,
   onPress,
 }: {
-  icon: string;
+  Icon: React.ElementType;
   isActive: boolean;
   onPress: () => void;
 }) => (
@@ -31,9 +32,11 @@ const FeedbackButton = ({
     onPress={onPress}
     style={[styles.feedbackButton, isActive && styles.feedbackButtonActive]}
   >
-    <Text style={styles.feedbackIcon}>{icon}</Text>
+    <Icon size={16} color={isActive ? '#1D4ED8' : '#64748B'} strokeWidth={2.5} />
   </TouchableOpacity>
 );
+
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 export default function ChatMessageItem({
   item,
@@ -91,8 +94,9 @@ export default function ChatMessageItem({
             </Animated.View>
           )}
 
-          <TouchableOpacity
+          <AnimatedTouchableOpacity
             activeOpacity={0.8}
+            layout={LinearTransition.duration(300).easing(Easing.inOut(Easing.ease))}
             onLongPress={() => onLongPress(item.id)}
             onPress={() => {
               if (activeReactionMessageId) onClearReaction();
@@ -143,12 +147,12 @@ export default function ChatMessageItem({
               <>
                 <View style={styles.feedbackContainer}>
                   <FeedbackButton
-                    icon="👍"
+                    Icon={ThumbsUp}
                     isActive={item.feedbackType === 'liked'}
                     onPress={() => onFeedbackPress(item.id, 'liked')}
                   />
                   <FeedbackButton
-                    icon="👎"
+                    Icon={ThumbsDown}
                     isActive={item.feedbackType === 'disliked'}
                     onPress={() => onFeedbackPress(item.id, 'disliked')}
                   />
@@ -156,8 +160,8 @@ export default function ChatMessageItem({
 
                 {item.feedbackType === 'disliked' && (
                   <Animated.View 
-                    entering={FadeIn.duration(500)} 
-                    layout={LinearTransition.duration(500)} 
+                    entering={FadeInDown.duration(300).easing(Easing.inOut(Easing.ease))} 
+                    layout={LinearTransition.duration(300).easing(Easing.inOut(Easing.ease))} 
                     style={styles.feedbackChipsContainer}
                   >
                     {FEEDBACK_CHIPS.map(chip => (
@@ -173,7 +177,7 @@ export default function ChatMessageItem({
                 )}
               </>
             )}
-          </TouchableOpacity>
+          </AnimatedTouchableOpacity>
 
           {item.reaction && !!item.reaction && (
             <View

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatMessage } from '../store/chatSlice';
+import { Send, X } from 'lucide-react-native';
 
 interface ChatInputProps {
   replyingTo: ChatMessage | null;
@@ -38,7 +39,7 @@ export default function ChatInput({ replyingTo, onSend, onCancelReply, onFocus }
             </Text>
           </View>
           <TouchableOpacity onPress={onCancelReply} style={styles.cancelReplyButton}>
-            <Text style={styles.cancelReplyText}>✕</Text>
+            <X size={18} color="#64748B" strokeWidth={2.5} />
           </TouchableOpacity>
         </View>
       )}
@@ -63,7 +64,7 @@ export default function ChatInput({ replyingTo, onSend, onCancelReply, onFocus }
           onPress={handleSend}
           disabled={!inputText.trim()}
         >
-          <Text style={styles.sendButtonText}>Send</Text>
+          <Send size={18} color={!inputText.trim() ? '#60A5FA' : '#FFFFFF'} strokeWidth={2.5} />
         </TouchableOpacity>
       </View>
     </>
@@ -132,9 +133,9 @@ const styles = StyleSheet.create({
   sendButton: {
     marginLeft: 12,
     backgroundColor: '#007AFF',
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
